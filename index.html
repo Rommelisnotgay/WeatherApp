@@ -2,43 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Romars | Weather</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Romars Weather</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card">
-        <form class="weatherForm">
-            <input type="text" class="city-input" placeholder="Enter a City">
-            <button type="submit" class="subBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
-        </form>
-        <div class="error"></div>
-        <div class="weather">
-            <h1 class="city"></h1>
-            <p class="state"></p>
-            <p class="temp"></p>
-            <p class="details"></p>
-            <div class="cards">
-                <div class="lap one">
-                    <h3 class="lapapp">Humidity</h3>
-                    <h3 class="lapIco"><i class="fa-solid fa-droplet"></i></h3>
-                    <h3 class="lapPerHum"></h3>
+    <header>
+        <h1 class="app-title"><i class="fa-solid fa-cloud-sun"></i> Romars Weather</h1>
+    </header>
+    <main>
+        <section class="weather-app-container">
+            <form class="weather-form" autocomplete="off">
+                <input type="text" class="city-input" placeholder="Enter city name..." autofocus required />
+                <button type="submit" class="search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </form>
+
+            <div class="alert-message" style="display:none;"></div>
+
+            <div class="weather-card" style="display:none;">
+                <div class="weather-header">
+                    <div class="city-info">
+                        <h2 class="city-name"></h2>
+                        <span class="weather-description"></span>
+                    </div>
+                    <div class="weather-icon-state"></div>
                 </div>
-                <div class="lap two">
-                    <h3 class="lapapp">Clouds</h3>
-                    <h3 class="lapIco"><i class="fa-solid fa-cloud"></i></h3>
-                    <h3 class="lapPerCloud"></h3>
-                </div>
-                <div class="lap three">
-                    <h3 class="lapapp">Pressure</h3>
-                    <h3 class="lapIco"><i class="fa-solid fa-arrows-up-down"></i></h3>
-                    <h3 class="lapPerPre"></h3>
+                <div class="main-temperature"></div>
+                <div class="weather-details">
+                    <div class="weather-detail humidity">
+                        <i class="fa-solid fa-droplet"></i> <span class="humidity-value"></span> <span>%</span>
+                    </div>
+                    <div class="weather-detail clouds">
+                        <i class="fa-solid fa-cloud"></i> <span class="clouds-value"></span> <span>%</span>
+                    </div>
+                    <div class="weather-detail pressure">
+                        <i class="fa-solid fa-arrows-up-down"></i> <span class="pressure-value"></span> <span>hPa</span>
+                    </div>
                 </div>
             </div>
+        </section>
+    </main>
+    <footer>
+        <small>Made with <i class="fa-solid fa-code"></i> by Rommel</small>
+    </footer>
 
-        </div>
-    </div>
     <script src="mainjs.js"></script>
 </body>
 </html>

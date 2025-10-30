@@ -1,143 +1,97 @@
-// main var 
-const mainInput = document.querySelector(".city-input");
-const subBtn = document.querySelector(".subBtn");
+
 const apiKey = "4f6620bd3c73e72facd9b9b4d2957973";
-const msg = document.querySelector(".error");
-const weatherDiv = document.querySelector(".weather"); 
-// https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={API key}
+const form = document.querySelector('.weather-form');
+const cityInput = document.querySelector('.city-input');
+const weatherCard = document.querySelector('.weather-card');
+const alertMessage = document.querySelector('.alert-message');
 
-let city = "Cairo";
-function callApi () {
-    subBtn.addEventListener("click" , function(event){
-        event.preventDefault();
-        if(mainInput.value === ""){
-        showError("Please Enter A City!");
-        }
-        else{
-            msg.textContent = "";
-            msg.classList.remove("displayy");
-            city = mainInput.value.trim();
-            generate(city , apiKey);
-            mainInput.value = "";
-        }
-    });    
+// Display alert message
+function showAlert(msg) {
+  alertMessage.textContent = msg;
+  alertMessage.style.display = "block";
+}
+function hideAlert() {
+  alertMessage.style.display = "none";
 }
 
-async function generate(city , apiKey){
-    const link = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
-    try{
-    const response = await fetch(link);
+// Handle API and UI logic
+async function fetchWeather(city) {
+  showLoader();
+  hideAlert();
+  weatherCard.style.display = "none";
+  try {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
+    const response = await fetch(url);
+    if (!response.ok)
+      throw new Error('City not found!');
     const data = await response.json();
-    console.log(data);
-    if(data.cod != 404){
-        showData(data);
-    }
-    else{
-        showError("Please Enter A Valid City");
-    }
-    }
-    catch(error){
-        showError("Oops There Is A Problem Try Again Later")
-    }
+    populateWeatherCard(data);
+    weatherCard.style.display = "flex";
+  } catch (e) {
+    showAlert("City not found! Please try again.");
+  }
+  hideLoader();
 }
 
-function showData (data) {
-    const {
-        name: cityName,
-        clouds: {all:cloudsTemp},
-        main: {
-            temp: tempHeat,
-            pressure: pressurePer,
-            humidity: humidityPer
-        },
-        weather: [{id: ID}]
-    } = data;
-    
-    weatherDiv.classList.add("show");
-    const card = document.querySelector(".card");
-    card.classList.add("extend"); 
-    document.querySelector(".city").textContent = `${cityName}`;
-
-    document.querySelector(".state").innerHTML = `${state(ID)}`;
-
-    document.querySelector(".temp").textContent = `${(tempHeat - 273.25).toFixed(1)}°C`;
-
-    document.querySelector(".details").textContent = `${detailed(ID)}`;
-    
-    document.querySelector(".lapPerHum").textContent = `${humidityPer}%`;
-    document.querySelector(".lapPerCloud").textContent = `${cloudsTemp}%`;
-    document.querySelector(".lapPerPre").textContent = `${pressurePer}Mpe`;
-
+// Show loading indicator on button
+function showLoader() {
+  const btn = document.querySelector('.search-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+}
+function hideLoader() {
+  const btn = document.querySelector('.search-btn');
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>';
 }
 
-function state(ID) {
-    let icon = "";
-
-    switch (true) {
-        case (ID >= 200 && ID <= 232):
-            icon = '<i class="fa-solid fa-bolt"></i>';
-            break;
-        case (ID >= 300 && ID <= 321):
-            icon = '<i class="fa-solid fa-cloud-rain"></i>'; 
-            break;
-        case (ID >= 500 && ID <= 531):
-            icon = '<i class="fa-solid fa-cloud-showers-heavy"></i>';
-            break;
-        case (ID >= 600 && ID <= 622):
-            icon = '<i class="fa-solid fa-snowflake"></i>'; 
-            break;
-        case (ID >= 701 && ID <= 781):
-            icon = '<i class="fa-solid fa-smog"></i>'; 
-            break;
-        case (ID === 800):
-            icon = '<i class="fa-solid fa-sun"></i>';
-            break;
-        case (ID >= 801 && ID <= 804):
-            icon = '<i class="fa-solid fa-cloud"></i>'; 
-            break;
-        default:
-            icon = '<i class="fa-solid fa-question"></i>'; 
-    }
-
-    return icon;
-}
-function detailed(ID) {
-    switch (true) {
-        case (ID >= 200 && ID <= 232):
-            return "Thunderstorm";
-        case (ID >= 300 && ID <= 321):
-            return "Drizzle";
-        case (ID >= 500 && ID <= 531):
-            return "Rain";
-        case (ID >= 600 && ID <= 622):
-            return "Snow";
-        case (ID >= 701 && ID <= 781):
-            return "Atmosphere (Mist/Fog/Smoke)";
-        case (ID === 800):
-            return "Clear Sky";
-        case (ID >= 801 && ID <= 804):
-            return "Clouds";
-        default:
-            return "Unknown";
-    }
+// Update UI with fetched weather data
+function populateWeatherCard(data) {
+  document.querySelector('.city-name').textContent = `${data.name}, ${data.sys.country}`;
+  document.querySelector('.main-temperature').textContent = `${Math.round(data.main.temp)}°C`;
+  document.querySelector('.weather-description').textContent = capitalize(data.weather[0].description);
+  document.querySelector('.humidity-value').textContent = data.main.humidity;
+  document.querySelector('.clouds-value').textContent = data.clouds.all;
+  document.querySelector('.pressure-value').textContent = data.main.pressure;
+  document.querySelector('.weather-icon-state').innerHTML = getWeatherIcon(data.weather[0].id);
 }
 
-
-function showError (message){
-    if(msg.hideTimeout) clearTimeout(msg.hideTimeout);
-    msg.textContent = message;
-    msg.classList.add("displayy");    
-    msg.hideTimeout = setTimeout(() => {
-        msg.classList.remove("displayy");
-        
-    }, 2000);
-    msg.hideTimeout = setTimeout(()=>{msg.textContent = "";}, 3000)
-    
+// Weather icons map
+function getWeatherIcon(id) {
+  if (id >= 200 && id <= 232) return '<i class="fa-solid fa-bolt"></i>';
+  if (id >= 300 && id <= 321) return '<i class="fa-solid fa-cloud-rain"></i>';
+  if (id >= 500 && id <= 531) return '<i class="fa-solid fa-cloud-showers-heavy"></i>';
+  if (id >= 600 && id <= 622) return '<i class="fa-solid fa-snowflake"></i>';
+  if (id >= 701 && id <= 781) return '<i class="fa-solid fa-smog"></i>';
+  if (id === 800) return '<i class="fa-solid fa-sun"></i>';
+  if (id >= 801 && id <= 804) return '<i class="fa-solid fa-cloud"></i>';
+  return '<i class="fa-solid fa-question"></i>';
 }
 
+// Capitalize weather description
+function capitalize(text) {
+  return text
+    ? text.charAt(0).toUpperCase() + text.slice(1)
+    : "";
+}
 
+// Handle user submit
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  hideAlert();
+  const city = cityInput.value.trim();
+  if (!city) {
+    showAlert('Please enter a city name.');
+    return;
+  }
+  fetchWeather(city);
+});
 
+// Dismiss alert on click
+alertMessage.addEventListener('click', hideAlert);
 
+// Autofocus city input on load and fetch for default city
 window.onload = () => {
-    callApi();
+  cityInput.focus();
+  fetchWeather("Cairo");
 };
